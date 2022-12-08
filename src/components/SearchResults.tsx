@@ -1,21 +1,27 @@
-import { ProductItem } from "./ProductItem"
+import { useMemo } from "react";
+import { ProductItem } from "./ProductItem";
 
 interface SearchResultsProps {
   results: Array<{
-    id: number
-    price: number
-    title: string
-  }>
+    id: number;
+    price: number;
+    title: string;
+  }>;
 }
 
 export function SearchResults({ results }: SearchResultsProps) {
+  const totalPrice = useMemo(() => {
+    return results.reduce((accumulator, product) => {
+      return accumulator + product.price;
+    }, 0);
+  }, [results]);
+
   return (
-    <ul>
-      {results.map(product => {
-        return (
-          <ProductItem product={product} />
-        )
+    <div>
+      <h2>Total Price: {totalPrice}</h2>
+      {results.map((product) => {
+        return <ProductItem product={product} />;
       })}
-    </ul>
-  )
+    </div>
+  );
 }
