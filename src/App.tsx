@@ -1,17 +1,46 @@
-import { FormEvent, useCallback, useState } from "react";
+import { FormEvent, Suspense, useCallback, useState } from "react";
 import { SearchResults } from "./components/SearchResults";
+import { ProductDTO } from "./DTO/ProductDTO";
+
+interface Result {
+  products: ProductDTO[];
+  totalPrice: number;
+}
 
 function App() {
   const [search, setSearch] = useState("");
-  const [results, setResults] = useState([]);
+  const [result, setResult] = useState<Result>({
+    products: [],
+    totalPrice: 0,
+  });
 
   async function handleSearch(event: FormEvent) {
     event.preventDefault();
     if (!search.trim()) return;
 
     const response = await fetch(`http://localhost:3333/products?q=${search}`);
-    const data = await response.json();
-    setResults(data);
+    const data: ProductDTO[] = await response.json();
+
+    const formatter = new Intl.NumberFormat("pt-br", {
+      style: "currency",
+      currency: "BRL",
+    });
+
+    const products = data.map((product) => {
+      return {
+        ...product,
+        priceFormatted: formatter.format(product.price),
+      };
+    });
+
+    const totalPrice = data.reduce((accumulator, product) => {
+      return accumulator + product.price;
+    }, 0);
+
+    setResult({
+      products,
+      totalPrice,
+    });
   }
 
   const addToWishList = useCallback((id: number) => {
@@ -19,7 +48,7 @@ function App() {
   }, []);
 
   return (
-    <div>
+    <Suspense fallback={<span>Carregando...</span>}>
       <h1>Search</h1>
 
       <form onSubmit={handleSearch}>
@@ -32,8 +61,8 @@ function App() {
         <button type="submit">Buscar</button>
       </form>
 
-      <SearchResults results={results} onAddToWishList={addToWishList} />
-    </div>
+      <SearchResults result={result} onAddToWishList={addToWishList} />
+    </Suspense>
   );
 }
 

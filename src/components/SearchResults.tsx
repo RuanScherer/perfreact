@@ -1,29 +1,21 @@
-import { useMemo } from "react";
+import { ProductDTO } from "../DTO/ProductDTO";
 import { ProductItem } from "./ProductItem";
 
 interface SearchResultsProps {
-  results: Array<{
-    id: number;
-    price: number;
-    title: string;
-  }>;
+  result: Result;
   onAddToWishList: (id: number) => void;
 }
 
-export function SearchResults({
-  results,
-  onAddToWishList,
-}: SearchResultsProps) {
-  const totalPrice = useMemo(() => {
-    return results.reduce((accumulator, product) => {
-      return accumulator + product.price;
-    }, 0);
-  }, [results]);
+interface Result {
+  products: ProductDTO[];
+  totalPrice: number;
+}
 
+export function SearchResults({ result, onAddToWishList }: SearchResultsProps) {
   return (
     <div>
-      <h2>Total Price: {totalPrice}</h2>
-      {results.map((product) => {
+      <h2>Total Price: {result.totalPrice}</h2>
+      {result.products.map((product) => {
         return (
           <ProductItem
             product={product}

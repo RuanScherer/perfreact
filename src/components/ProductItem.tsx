@@ -1,11 +1,14 @@
-import { memo } from "react";
+import { lazy, memo, useState } from "react";
+import { ProductDTO } from "../DTO/ProductDTO";
+
+const AddProductToWishlist = lazy(async () => {
+  return import("./AddProductToWishlist").then((mod) => ({
+    default: mod.AddProductToWishlist,
+  }));
+});
 
 interface ProductItemProps {
-  product: {
-    id: number;
-    price: number;
-    title: string;
-  };
+  product: ProductDTO;
   onAddToWishList: (id: number) => void;
 }
 
@@ -13,15 +16,24 @@ export function ProductItemComponent({
   product,
   onAddToWishList,
 }: ProductItemProps) {
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+
   return (
     <div style={{ margin: "8px 0" }}>
-      {product.title} - <strong>{product.price}</strong>
-      <button
-        style={{ display: "block" }}
-        onClick={() => onAddToWishList(product.id)}
-      >
-        Add to wishlist
-      </button>
+      {product.title} - <strong>{product.priceFormatted}</strong>
+      {isAddingToWishlist ? (
+        <AddProductToWishlist
+          onAddToWishlist={() => onAddToWishList(product.id)}
+          onRequestClose={() => setIsAddingToWishlist(false)}
+        />
+      ) : (
+        <button
+          style={{ display: "block" }}
+          onClick={() => setIsAddingToWishlist(true)}
+        >
+          Adicionar aos favoritos
+        </button>
+      )}
     </div>
   );
 }
